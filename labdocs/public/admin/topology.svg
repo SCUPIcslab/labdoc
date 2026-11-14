@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="cslab-topology" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" role="img" aria-label="SCUPI CSLAB 实验室网络架构拓扑图">
+<style>
+  .band{fill:#f8fafc;stroke:#e2e8f0;stroke-width:1.5}
+  .bandlbl{font-size:13px;font-weight:700;fill:#64748b;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  .bx{stroke-width:2}
+  .b-blue{fill:#eef2ff;stroke:#3451b2}
+  .b-amber{fill:#fff7ed;stroke:#b45309}
+  .b-pink{fill:#fdf2f8;stroke:#db2777}
+  .b-purple{fill:#f5f3ff;stroke:#7c3aed}
+  .b-teal{fill:#ecfeff;stroke:#0e7490}
+  .b-grey{fill:#f1f5f9;stroke:#94a3b8}
+  .b-white{fill:#ffffff;stroke:#cbd5e1;stroke-width:1.5}
+  .t{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;fill:#1f2937}
+  .tt{font-size:17px;font-weight:700}
+  .ts{font-size:12.5px;fill:#475569}
+  .tm{font-size:12px;fill:#475569}
+  .tmono{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;fill:#334155}
+  .tgrey{font-size:11.5px;fill:#64748b}
+  .tblue{font-size:12px;font-weight:600;fill:#3451b2}
+  .tamber{font-size:12px;font-weight:600;fill:#b45309}
+  .tpurple{font-size:12px;font-weight:600;fill:#7c3aed}
+  .tteal{font-size:12px;font-weight:600;fill:#0e7490}
+  .ln{stroke:#3451b2;stroke-width:2.5;fill:none}
+  .ln2{stroke:#94a3b8;stroke-width:2;fill:none}
+  .lnw{stroke:#b45309;stroke-width:2.2;fill:none;stroke-dasharray:7 5}
+  .lnv{stroke:#7c3aed;stroke-width:2;fill:none;stroke-dasharray:6 5}
+  .lbl{font-family:ui-monospace,Consolas,monospace;font-size:11px;fill:#475569}
+  .node{cursor:pointer}
+  .node:hover .bx{stroke-width:3.5}
+  .node:hover{filter:drop-shadow(0 3px 8px rgba(52,81,178,.18))}
+</style>
+<rect width="1600" height="1200" fill="#ffffff"/>
+<title>SCUPI CSLAB 实验室网络架构图</title>
+<desc>依据手绘图整理，并依据 labdocs 手册补齐无线、VLAN、BMC 与 OpenStack 部分。蓝色为原图内容，橙色与粉色为补充内容。</desc>
+
+<!-- bands -->
+<rect rx="14" class="band" x="24" y="24" width="1552" height="112"/>
+<text class="bandlbl" x="40" y="46">① 校园网 / WAN</text>
+<rect rx="14" class="band" x="24" y="152" width="1552" height="252"/>
+<text class="bandlbl" x="40" y="174">② 出口路由器 / 无线接入</text>
+<rect rx="14" class="band" x="24" y="500" width="1552" height="200"/>
+<text class="bandlbl" x="40" y="522">③ 核心交换 / 三层网关</text>
+<rect rx="14" class="band" x="24" y="716" width="1552" height="308"/>
+<text class="bandlbl" x="40" y="738">④ 接入层与物理计算</text>
+<rect rx="14" class="band" x="24" y="1040" width="1552" height="144"/>
+<text class="bandlbl" x="40" y="1062">⑤ 虚拟层 / 网段</text>
+
+<!-- ===== 1 WAN ===== -->
+<g class="node" data-node="wan">
+  <rect rx="12" class="bx b-blue" x="460" y="52" width="480" height="72"/>
+  <text class="t tt" x="700" y="80" text-anchor="middle">SCUNET 校园网 / Internet</text>
+  <text class="t ts" x="700" y="103" text-anchor="middle">WAN eth1 DHCP IPv4 + DHCPv6 前缀 上级网关 223.129.97.254</text>
+</g>
+
+<!-- ===== 2 router ===== -->
+<g class="node" data-node="router">
+  <rect rx="12" class="bx b-blue" x="340" y="192" width="720" height="184"/>
+  <text class="t tt" x="358" y="220">出口路由器 Netcore N60 Pro</text>
+  <text class="t ts" x="358" y="242">ImmortalWrt 21.02 MT7986 原图标注 ROUTER 192.168.1.1 / 172.16.34.254</text>
+  <g>
+    <rect class="b-white bx" x="358" y="256" width="218" height="54" rx="8"/>
+    <text class="t tmono" x="370" y="276">eth1 WAN</text>
+    <text class="t tgrey" x="370" y="296">DHCP / DHCPv6 客户端</text>
+  </g>
+  <g>
+    <rect class="b-white bx" x="584" y="256" width="218" height="54" rx="8"/>
+    <text class="t tmono" x="596" y="276">lan4 172.16.23.254</text>
+    <text class="t tgrey" x="596" y="296">untagged → PVID 3704</text>
+  </g>
+  <g>
+    <rect class="b-white bx" x="810" y="256" width="232" height="54" rx="8"/>
+    <text class="t tmono" x="822" y="276">br-lan 172.16.34.254</text>
+    <text class="t tgrey" x="822" y="296">lan4.3714 → Tagged 3714</text>
+  </g>
+  <text class="t tm" x="358" y="332">DNS / dnsmasq（*.internal） NAT RA / DHCPv6 静态回程路由 → 172.16.23.1</text>
+  <text class="t tgrey" x="358" y="356">两个 LAN 地址是同一台设备的不同接口：.23.254 只做路由，.34.254 提供 SSH / DNS / Web。</text>
+</g>
+
+<!-- ===== 2 wifi ===== -->
+<line class="lnw" x1="1060" y1="284" x2="1090" y2="284"/>
+<text class="lbl" x="1062" y="274">br-lan</text>
+<g class="node" data-node="wifi">
+  <rect rx="12" class="bx b-amber" x="1090" y="192" width="470" height="184"/>
+  <text class="tamber" x="1106" y="218">无线 AP 依据 admin/router.md 补齐</text>
+  <g>
+    <rect class="b-white bx" x="1106" y="230" width="214" height="60" rx="8"/>
+    <text class="t tmono" x="1118" y="252">ImmortalWrt-2.4G</text>
+    <text class="t tgrey" x="1118" y="272">ra0 ch11 HE20 WPA2</text>
+  </g>
+  <g>
+    <rect class="b-white bx" x="1328" y="230" width="214" height="60" rx="8"/>
+    <text class="t tmono" x="1340" y="252">ImmortalWrt-5G</text>
+    <text class="t tgrey" x="1340" y="272">rax0 ch36 HE80 WPA2</text>
+  </g>
+  <text class="t tm" x="1106" y="310">两个 SSID 桥接 br-lan，与有线 VLAN 3714 同一二层域，IPv4 地址由 H3C 下发。</text>
+  <text class="t tm" x="1106" y="332">IPv6：RA + DHCPv6，RDNSS fd45:d5fc:44f6::1，ULA 经 NAT66 出网。</text>
+  <text class="t tm" x="1106" y="354">已知问题：5G + IPv4 大响应卡顿，HNAT 硬件加速目前为临时关闭状态。</text>
+</g>
+
+<!-- ===== trunk ===== -->
+<line class="ln" x1="700" y1="124" x2="700" y2="192"/>
+<text class="lbl" x="712" y="160">WAN</text>
+<line class="ln" x1="700" y1="376" x2="700" y2="420"/>
+<line class="ln" x1="700" y1="484" x2="700" y2="536"/>
+<g class="node" data-node="trunk">
+  <rect rx="12" class="bx b-blue" x="450" y="420" width="500" height="64"/>
+  <text class="t tblue" x="700" y="444" text-anchor="middle">GE1/0/47 Trunk 1Gbps 全双工</text>
+  <text class="t tmono" x="700" y="466" text-anchor="middle">PVID 3704 (untagged)　|　Tagged 3714　|　允许 VLAN 3704 / 3714</text>
+</g>
+<text class="tgrey" x="966" y="446">注：「Tagged 3714)」「允许 vlan 3704 3714」</text>
+<text class="tgrey" x="966" y="466">去掉 3704 会断管理网，去掉 3714 会影响用户网。</text>
+
+<!-- ===== 3 switch ===== -->
+<g class="node" data-node="switch">
+  <rect rx="12" class="bx b-blue" x="120" y="536" width="1160" height="136"/>
+  <text class="t tt" x="140" y="562">H3C S5120V3-54S-EI 三层核心交换机</text>
+  <text class="t ts" x="140" y="584">Comware 7 48×GE + 6×SFP+ 各 VLAN 的三层网关都在这台设备上，跨 VLAN 不必绕出口路由器</text>
+  <g>
+    <rect class="b-white bx" x="140" y="594" width="176" height="44" rx="7"/>
+    <text class="t tmono" x="150" y="612">VLAN 3704</text><text class="t tgrey" x="150" y="630">172.16.23.1 管理网</text>
+  </g>
+  <g>
+    <rect class="b-white bx" x="324" y="594" width="176" height="44" rx="7"/>
+    <text class="t tmono" x="334" y="612">VLAN 3705</text><text class="t tgrey" x="334" y="630">172.16.24.1 BMC</text>
+  </g>
+  <g>
+    <rect class="b-white bx" x="508" y="594" width="176" height="44" rx="7"/>
+    <text class="t tmono" x="518" y="612">VLAN 3710</text><text class="t tgrey" x="518" y="630">172.16.30.1 保留</text>
+  </g>
+  <g>
+    <rect class="b-white bx" x="692" y="594" width="176" height="44" rx="7"/>
+    <text class="t tmono" x="702" y="612">VLAN 3711</text><text class="t tgrey" x="702" y="630">172.16.31.1 T3711</text>
+  </g>
+  <g>
+    <rect class="b-white bx" x="876" y="594" width="176" height="44" rx="7"/>
+    <text class="t tmono" x="886" y="612">VLAN 3713</text><text class="t tgrey" x="886" y="630">172.16.33.1 GPU/VM</text>
+  </g>
+  <g>
+    <rect class="b-white bx" x="1060" y="594" width="200" height="44" rx="7"/>
+    <text class="t tmono" x="1070" y="612">VLAN 3714</text><text class="t tgrey" x="1070" y="630">172.16.34.1 用户网</text>
+  </g>
+  <text class="t tgrey" x="140" y="662">默认路由 0.0.0.0/0 → 172.16.23.254 DHCP 池 vlan3714（网关 .34.1 / DNS .34.254） STP / LLDP / ACL 3000</text>
+</g>
+
+<!-- ===== 4 bus ===== -->
+<line class="ln2" x1="160" y1="740" x2="1372" y2="740"/>
+<line class="ln2" x1="700" y1="672" x2="700" y2="740"/>
+<line class="ln2" x1="160" y1="740" x2="160" y2="772"/>
+<line class="ln2" x1="384" y1="740" x2="384" y2="772"/>
+<line class="ln2" x1="608" y1="740" x2="608" y2="772"/>
+<line class="ln2" x1="832" y1="740" x2="832" y2="772"/>
+<line class="ln2" x1="1056" y1="740" x2="1056" y2="772"/>
+<line class="ln2" x1="1372" y1="740" x2="1372" y2="772"/>
+<text class="tgrey" x="56" y="762">服务器 Trunk BAGG1–5（GE1/0/1–10，动态 LACP）</text>
+<text class="tgrey" x="1184" y="762">接入 / 带外</text>
+
+<!-- servers -->
+<g class="node" data-node="host50">
+  <rect rx="12" class="bx b-blue" x="56" y="772" width="208" height="176"/>
+  <text class="t tt" x="70" y="798">host50</text>
+  <text class="t tmono" x="70" y="818">172.16.23.50</text>
+  <text class="t tgrey" x="70" y="838">BAGG1 GE1/0/1–2</text>
+  <line x1="70" y1="848" x2="250" y2="848" stroke="#c7d2fe"/>
+  <text class="t tm" x="70" y="868">GPU 计算 2×RTX 4090</text>
+  <text class="t tm" x="70" y="888">Cinder 本地存储</text>
+  <text class="t tm" x="70" y="908">控制节点 VM 宿主</text>
+  <text class="t tblue" x="70" y="932">最集中的单点</text>
+</g>
+<g class="node" data-node="host51">
+  <rect rx="12" class="bx b-blue" x="280" y="772" width="208" height="176"/>
+  <text class="t tt" x="294" y="798">host51</text>
+  <text class="t tmono" x="294" y="818">172.16.23.51</text>
+  <text class="t tgrey" x="294" y="838">BAGG2 GE1/0/3–4</text>
+  <line x1="294" y1="848" x2="474" y2="848" stroke="#c7d2fe"/>
+  <text class="t tm" x="294" y="868">GPU 计算 2×RTX 4090</text>
+  <text class="t tm" x="294" y="888">Cinder 本地存储</text>
+  <text class="t tm" x="294" y="908">GPU VM 1 宿主</text>
+  <text class="t tblue" x="294" y="932">2×100Mbps</text>
+</g>
+<g class="node" data-node="host52">
+  <rect rx="12" class="bx b-blue" x="504" y="772" width="208" height="176"/>
+  <text class="t tt" x="518" y="798">host52</text>
+  <text class="t tmono" x="518" y="818">172.16.23.52</text>
+  <text class="t tgrey" x="518" y="838">BAGG3 GE1/0/5–6</text>
+  <line x1="518" y1="848" x2="698" y2="848" stroke="#c7d2fe"/>
+  <text class="t tm" x="518" y="868">CPU 计算节点</text>
+  <text class="t tm" x="518" y="888">2×EPYC 9554 256 线程</text>
+  <text class="t tm" x="518" y="908">无本地 Cinder 数据盘</text>
+  <text class="t tgrey" x="518" y="932">Compute VM</text>
+</g>
+<g class="node" data-node="host53">
+  <rect rx="12" class="bx b-blue" x="728" y="772" width="208" height="176"/>
+  <text class="t tt" x="742" y="798">host53</text>
+  <text class="t tmono" x="742" y="818">172.16.23.53</text>
+  <text class="t tgrey" x="742" y="838">BAGG4 GE1/0/7–8</text>
+  <line x1="742" y1="848" x2="922" y2="848" stroke="#c7d2fe"/>
+  <text class="t tm" x="742" y="868">CPU 计算节点</text>
+  <text class="t tm" x="742" y="888">2×EPYC 9554 256 线程</text>
+  <text class="t tm" x="742" y="908">无本地 Cinder 数据盘</text>
+  <text class="t tgrey" x="742" y="932">Compute VM</text>
+</g>
+<g class="node" data-node="host54">
+  <rect rx="12" class="bx b-blue" x="952" y="772" width="208" height="176"/>
+  <text class="t tt" x="966" y="798">host54</text>
+  <text class="t tmono" x="966" y="818">172.16.23.54</text>
+  <text class="t tgrey" x="966" y="838">BAGG5 GE1/0/9–10</text>
+  <line x1="966" y1="848" x2="1146" y2="848" stroke="#c7d2fe"/>
+  <text class="t tm" x="966" y="868">CPU 计算节点</text>
+  <text class="t tm" x="966" y="888">2×EPYC 9554 256 线程</text>
+  <text class="t tm" x="966" y="908">无本地 Cinder 数据盘</text>
+  <text class="t tgrey" x="966" y="932">Test / Compute VM</text>
+</g>
+
+<!-- right column -->
+<g class="node" data-node="clientwired">
+  <rect rx="12" class="bx b-teal" x="1184" y="772" width="376" height="44"/>
+  <text class="t tmono" x="1198" y="791">用户有线接入 GE1/0/25–46</text>
+  <text class="t tgrey" x="1198" y="809">Access VLAN 3714 172.16.34.0/24 Client（原图右侧）</text>
+</g>
+<g class="node" data-node="edgesw">
+  <rect rx="12" class="bx b-teal" x="1184" y="824" width="376" height="44"/>
+  <text class="t tmono" x="1198" y="843">边缘交换机 TP-LINK TL-SG2024D</text>
+  <text class="t tgrey" x="1198" y="861">标准交换模式，不配 VLAN、不做路由，扩展用户端口</text>
+</g>
+<g class="node" data-node="bmc">
+  <rect rx="12" class="bx b-pink" x="1184" y="876" width="376" height="44"/>
+  <text class="t tmono" x="1198" y="895">BMC 带外 GE1/0/17–24 VLAN 3705</text>
+  <text class="t tgrey" x="1198" y="913">172.16.24.50–54 安装网 192.168.23.0/24 同段</text>
+</g>
+<g class="node" data-node="clientwifi">
+  <rect rx="12" class="bx b-teal" x="1184" y="928" width="376" height="44"/>
+  <text class="t tmono" x="1198" y="947">无线客户端 手机 / 笔记本</text>
+  <text class="t tgrey" x="1198" y="965">2.4G / 5G → 与有线同 VLAN 3714，DHCP 由 H3C 下发</text>
+</g>
+<g class="node" data-node="sfp">
+  <rect rx="12" class="bx b-grey" x="1184" y="980" width="376" height="44"/>
+  <text class="t tmono" x="1198" y="999">XGE1/0/49–54 10GbE SFP+</text>
+  <text class="t tgrey" x="1198" y="1017">预留，当前全部 Down</text>
+</g>
+
+<!-- wifi link -->
+<path class="lnw" d="M1325 376 C1325 520, 1572 620, 1572 950 L1560 950"/>
+<text class="lbl" x="1430" y="620" transform="rotate(90 1430 620)">802.11ax 无线链路</text>
+<text class="lbl" x="1400" y="500">2.4G ch11 / 5G ch36</text>
+
+<!-- VM links: 宿主机 → 实际运行其上的实例 -->
+<path class="lnv" d="M160 948 L160 1072"/>
+<path class="lnv" d="M200 948 L200 1032 L447 1032 L447 1072"/>
+<path class="lnv" d="M384 948 L384 1008 L713 1008 L713 1072"/>
+<path class="lnv" d="M608 948 L608 984 L1056 984"/>
+<path class="lnv" d="M832 948 L832 984"/>
+<path class="lnv" d="M1056 948 L1056 984"/>
+<path class="lnv" d="M979 984 L979 1072"/>
+<text class="lbl" x="250" y="1026">host50 → GPU VM 2</text>
+<text class="lbl" x="470" y="1002">host51 → GPU VM 1</text>
+<text class="lbl" x="660" y="978">host52–54 → Compute VM</text>
+
+<!-- ===== 5 VMs ===== -->
+<g class="node" data-node="ctrlvm">
+  <rect rx="12" class="bx b-purple" x="56" y="1072" width="250" height="88"/>
+  <text class="tpurple" x="70" y="1094">控制节点 VM（Control Node）</text>
+  <text class="t tmono" x="70" y="1116">172.16.23.41</text>
+  <text class="t tgrey" x="70" y="1136">宿主 host50 内部地址 10.16.23.41</text>
+  <text class="t tgrey" x="70" y="1152">OpenStack API / Horizon</text>
+</g>
+<g class="node" data-node="gpuvm2">
+  <rect rx="12" class="bx b-purple" x="322" y="1072" width="250" height="88"/>
+  <text class="tpurple" x="336" y="1094">GPU VM 2</text>
+  <text class="t tmono" x="336" y="1116">172.16.33.247</text>
+  <text class="t tgrey" x="336" y="1136">host50 2×RTX 4090 直通</text>
+  <text class="t tgrey" x="336" y="1152">启动卷在 host50 本地 LVM</text>
+</g>
+<g class="node" data-node="gpuvm1">
+  <rect rx="12" class="bx b-purple" x="588" y="1072" width="250" height="88"/>
+  <text class="tpurple" x="602" y="1094">GPU VM 1</text>
+  <text class="t tmono" x="602" y="1116">172.16.33.91</text>
+  <text class="t tgrey" x="602" y="1136">host51 2×RTX 4090 直通</text>
+  <text class="t tgrey" x="602" y="1152">系统卷经 iSCSI 来自 host50</text>
+</g>
+<g class="node" data-node="cpuvm">
+  <rect rx="12" class="bx b-purple" x="854" y="1072" width="250" height="88"/>
+  <text class="tpurple" x="868" y="1094">Compute VM（52 53 54）</text>
+  <text class="t tmono" x="868" y="1116">Test 172.16.33.11</text>
+  <text class="t tgrey" x="868" y="1136">host52–54 普通计算实例</text>
+  <text class="t tgrey" x="868" y="1152">卷多来自 host51 的 Cinder</text>
+</g>
+<g class="node" data-node="subnets">
+  <rect rx="12" class="bx b-teal" x="1120" y="1072" width="440" height="88"/>
+  <text class="tteal" x="1134" y="1094">三个关键网段</text>
+  <text class="t tmono" x="1134" y="1116">172.16.33.0/24 VLAN 3713 GPU / VM 业务网</text>
+  <text class="t tmono" x="1134" y="1136">172.16.34.0/24 VLAN 3714 客户端（有线 + 无线）</text>
+  <text class="t tmono" x="1134" y="1154">172.16.23.0/24 VLAN 3704 服务器管理 / OpenStack</text>
+</g>
+</svg>

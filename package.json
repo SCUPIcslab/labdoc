@@ -1,0 +1,18 @@
+{
+  "name": "scupi-cslab-handbook",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SCUPI CSLAB（N209ABC）手册站点",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
