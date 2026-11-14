@@ -1,6 +1,11 @@
 # 命令速查与讲解
 
-本章把手册中散落的命令按使用场景集中起来。每条命令不只给出写法，也说明它查什么、输出怎么看、什么时候不该用。日常使用时可以把它当速查表；排查故障时，先看[按现象查命令](#按现象查命令)，再回到对应章节。
+本页面把手册中散落的命令按使用场景集中起来。每条命令不只给出写法，也说明它查什么、输出怎么看、什么时候不该用。日常使用时可以把它当速查表；排查故障时，先看[按现象查命令](#按现象查命令)，再回到对应章节。
+
+如果需要查看 Linux 日常使用相关的命令，可以参考：
+- [TLDR Pages](https://tldr.sh/)：开源的命令速查，收录 Linux、macOS、Windows 和常用工具的命令。
+- [Linux 教程 | 菜鸟教程](https://www.runoob.com/linux/linux-tutorial.html)：中文的 Linux 命令速查，收录了常用命令和示例。
+- [Cheat-Sheets.org](http://cheat-sheets.org/)：英文的命令速查。
 
 ::: tip 怎么用这页
 - 只查一条命令：用浏览器搜索本页，或看右侧“本页目录”。
@@ -228,6 +233,21 @@ du -sh ~/.cache/huggingface
 ```
 
 Conda、pip 和 Hugging Face 的缓存都可以清理，但先确认没有正在运行的任务依赖它们。清理命令见[Conda 与 Python](#conda-与-python)。
+
+添加磁盘或扩容：
+
+```bash
+sudo fdisk -l
+sudo fdisk /dev/<new_vdisk>
+sudo mkfs.ext4 /dev/<new_vdisk_num>
+sudo mount /dev/<new_vdisk_num> /<new_disk_name>
+```
+
+获得访问磁盘的权限：
+
+```bash
+sudo chown -R <user_id>:<user_id> /<new_disk_name>/<user_id>
+```
 
 ## 进程与资源
 
