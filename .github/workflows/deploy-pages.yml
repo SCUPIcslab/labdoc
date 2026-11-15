@@ -31,6 +31,10 @@ jobs:
           test ! -e server.mts
           test ! -e .vitepress/auth.mts
           test ! -e .vitepress/auth.secret
+          test ! -e incident-2026-11-15
+          test ! -e gpu_env_evidence_20261115
+          test ! -e ir_919340_samples
+          test -z "$(find . -maxdepth 1 -type d -name '*uid[0-9]*' -print -quit)"
           echo "Public edition checks passed."
 
       - name: Setup Node.js

@@ -1,4 +1,4 @@
-# 交换机
+﻿# 交换机
 
 ## 角色
 
@@ -320,3 +320,4 @@ display current-configuration
 ---
 
 返回[管理员视角总目录](index.md) ｜ 返回[手册首页](../index.md)
+

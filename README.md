@@ -28,12 +28,16 @@ SCUPI CSLAB（N209ABC）实验室手册的 VitePress 静态站点。公开版只
 │   ├── command.md
 │   ├── admin/                          # 管理员视角
 │   ├── user/                           # 用户视角
+│   ├── safety/                         # 安全：挖矿手法、防护、排查、处置
 │   └── public/                         # 原样复制到站点根目录的静态文件
+├── print/                              # 离线打印材料，不参与站点构建
 ├── package.json
 └── package-lock.json
 ```
 
 `labdocs/` 下没有 `password/`。公开搜索索引也不包含任何凭据页内容。
+
+`print/` 不在 VitePress 的 `srcDir` 内，不会出现在站点中，页面也不链接到它。打印稿单独编译成 PDF。
 
 ## 本地开发
 
@@ -41,6 +45,8 @@ SCUPI CSLAB（N209ABC）实验室手册的 VitePress 静态站点。公开版只
 npm ci
 npm run docs:dev
 ```
+
+`docs:dev` 默认监听 `0.0.0.0:5173`，内网其他机器可以通过 `http://<本机内网IP>:5173/` 访问。只想在本机访问时用 `npm run docs:dev:local`。Windows 首次运行时如果弹出防火墙提示，允许“专用网络”即可。
 
 构建静态文件：
 

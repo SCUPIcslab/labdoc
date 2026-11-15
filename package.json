@@ -5,7 +5,8 @@
   "type": "module",
   "description": "SCUPI CSLAB（N209ABC）手册站点",
   "scripts": {
-    "docs:dev": "vitepress dev",
+    "docs:dev": "vitepress dev --host 0.0.0.0 --port 5173",
+    "docs:dev:local": "vitepress dev --host 127.0.0.1 --port 5173",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },

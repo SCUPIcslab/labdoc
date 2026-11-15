@@ -20,10 +20,20 @@ export default defineConfig({
   lastUpdated: false,
   head: [['meta', { name: 'theme-color', content: '#3451b2' }]],
 
+  vite: {
+    server: {
+      fs: {
+        // 打印稿放在 print/，不进入 VitePress 页面和站点构建。
+        deny: ['**/print/**']
+      }
+    }
+  },
+
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
       { text: '命令速查', link: '/command' },
+      { text: '安全', link: '/safety/' },
       { text: '管理员视角', link: '/admin/' },
       { text: '用户视角', link: '/user/' }
     ],
@@ -34,6 +44,17 @@ export default defineConfig({
         items: [
           { text: '手册首页', link: '/' },
           { text: '命令速查与讲解', link: '/command' }
+        ]
+      },
+      {
+        text: '安全',
+        collapsed: false,
+        items: [
+          { text: '安全总览', link: '/safety/' },
+          { text: '挖矿入侵手法', link: '/safety/mining' },
+          { text: '防护基线', link: '/safety/hardening' },
+          { text: '入侵排查与命令', link: '/safety/inspect' },
+          { text: '应急处置与上报', link: '/safety/response' }
         ]
       },
       {

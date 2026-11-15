@@ -6,7 +6,7 @@
 
 ## 总图
 
-<a href="/admin/topology.svg" target="_blank" rel="noopener"><img src="/admin/topology.svg" alt="实验室网络架构总图：校园网出口、出口路由器、核心交换机、五台服务器、BMC、无线 AP 与 OpenStack 虚拟网络" style="cursor: zoom-in"></a>
+<a href="./topology.svg" target="_blank" rel="noopener">![实验室网络架构总图：校园网出口、出口路由器、核心交换机、五台服务器、BMC、无线 AP 与 OpenStack 虚拟网络](/admin/topology.svg){style="cursor: zoom-in"}</a>
 
 点击图片可以在新标签页打开原尺寸版本。
 

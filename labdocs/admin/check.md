@@ -23,7 +23,7 @@
 | 存储 | host50、host51 的 Cinder thin pool 使用率，iSCSI 会话，host52–54 无本地后端的状态。 |
 | 核心交换机 | 版本、接口、BAGG1–5、GE1/0/47、LACP、VLAN、默认路由、NTP、DHCP 地址池、ACL 3000。 |
 | 出口路由器 | 型号、接口地址、默认路由、回程路由、IPv6 默认路由。 |
-| 安全基线 | 五台 BMC 的 443 端口、Horizon 的 80 端口。 |
+| 安全基线 | 五台 BMC 的 443 端口、Horizon 的 80 端口；SSH 基线和入侵排查见[安全](../safety/index.md)。 |
 
 ## 运行前准备
 
@@ -36,14 +36,23 @@
 pip install paramiko
 ```
 
-脚本在管理员电脑或控制节点上运行，需要能访问以下地址：
+脚本在管理员电脑或控制节点上运行，需要能访问控制节点、五台宿主机、核心交换机、出口路由器和 BMC。地址全部从环境变量读取，默认值使用 RFC 5737 文档网段，只用于演示：
 
-- `172.16.23.41`：控制节点。
-- `172.16.23.50`–`172.16.23.54`：五台宿主机。
-- `172.16.33.1`：H3C 交换机。
-- `172.16.34.254`：出口路由器。
-- `172.16.33.91`、`172.16.33.247`：GPU 虚拟机（可选）。
-- `172.16.24.50`–`172.16.24.54`：BMC（只探 443 端口）。
+| 变量 | 用途 | 默认值 |
+|---|---|---|
+| `LAB_CTRL_IP` | 控制节点 | `192.0.2.10` |
+| `LAB_HOSTS` | 宿主机编号，逗号分隔 | `50,51,52,53,54` |
+| `LAB_HOST_NET_PREFIX` | 宿主机管理地址前缀 | `192.0.2.` |
+| `LAB_HOST_INNER_PREFIX` | 宿主机内部地址前缀 | `198.51.100.` |
+| `LAB_GATEWAY` | 宿主机默认网关 | `192.0.2.1` |
+| `LAB_SWITCH_IP` | 核心交换机 | `192.0.2.11` |
+| `LAB_ROUTER_IP` | 出口路由器 | `192.0.2.12` |
+| `LAB_ROUTER_LAN_IP` | 路由器内网接口 | `192.0.2.254` |
+| `LAB_DHCP_GATEWAY` | VLAN3714 DHCP 网关 | `192.0.2.253` |
+| `LAB_RETURN_ROUTES` | 路由器回程网段，逗号分隔 | `198.51.100.0/24,203.0.113.0/24` |
+| `LAB_GPU_VM_1`、`LAB_GPU_VM_2` | 两台 GPU 虚拟机（可选） | `192.0.2.21`、`192.0.2.22` |
+| `LAB_BMC_1`–`LAB_BMC_5` | 五台 BMC（只探 443 端口） | `192.0.2.31`–`192.0.2.35` |
+| `LAB_OS_AUTH_URL` | OpenStack 认证地址 | `http://192.0.2.10:5000/v3` |
 
 ### 登录信息
 
@@ -135,15 +144,24 @@ from paramiko import Transport
 if "ssh-rsa" not in Transport._preferred_keys:
     Transport._preferred_keys = tuple(Transport._preferred_keys) + ("ssh-rsa",)
 
-HOSTS = [50, 51, 52, 53, 54]
-CTRL_IP = "172.16.23.41"
-SWITCH_IP = "172.16.33.1"
-ROUTER_IP = "172.16.34.254"
+# 设备地址从环境变量读取。默认值使用 RFC 5737 文档网段，仅用于演示；
+# 实际巡检前按现场环境设置 LAB_* 变量，或修改下面的默认值。
+CTRL_IP = os.environ.get("LAB_CTRL_IP", "192.0.2.10")
+SWITCH_IP = os.environ.get("LAB_SWITCH_IP", "192.0.2.11")
+ROUTER_IP = os.environ.get("LAB_ROUTER_IP", "192.0.2.12")
+HOSTS = [int(x) for x in os.environ.get("LAB_HOSTS", "50,51,52,53,54").split(",") if x.strip()]
+HOST_NET_PREFIX = os.environ.get("LAB_HOST_NET_PREFIX", "192.0.2.")
+HOST_INNER_PREFIX = os.environ.get("LAB_HOST_INNER_PREFIX", "198.51.100.")
+GATEWAY = os.environ.get("LAB_GATEWAY", "192.0.2.1")
+ROUTER_LAN_IP = os.environ.get("LAB_ROUTER_LAN_IP", "192.0.2.254")
+DHCP_GATEWAY = os.environ.get("LAB_DHCP_GATEWAY", "192.0.2.253")
+RETURN_ROUTES = [x.strip() for x in os.environ.get(
+    "LAB_RETURN_ROUTES", "198.51.100.0/24,203.0.113.0/24").split(",") if x.strip()]
 GPU_VMS = {
-    "gpu_server_2x4090_1": "172.16.33.91",
-    "gpu_server_2x4090_2": "172.16.33.247",
+    "gpu-vm-1": os.environ.get("LAB_GPU_VM_1", "192.0.2.21"),
+    "gpu-vm-2": os.environ.get("LAB_GPU_VM_2", "192.0.2.22"),
 }
-BMC_IPS = ["172.16.24.50", "172.16.24.51", "172.16.24.52", "172.16.24.53", "172.16.24.54"]
+BMC_IPS = [os.environ.get(f"LAB_BMC_{i}", f"192.0.2.{30 + i}") for i in range(1, 6)]
 SECTION_ORDER = ["OpenStack", "控制节点", "计算节点", "GPU", "存储", "核心交换机", "出口路由器", "安全基线"]
 STATUS_RANK = {"OK": 0, "INFO": 0, "WARN": 1, "FAIL": 2}
 
@@ -437,7 +455,7 @@ HOST_COMMAND = "; ".join([
 
 
 def collect_host(host, cfg):
-    ip = f"172.16.23.{host}"
+    ip = f"{HOST_NET_PREFIX}{host}"
     text = ssh_exec(ip, cfg["host_user"], cfg["host_password"], HOST_COMMAND, timeout=100)
     return host, text
 
@@ -489,16 +507,17 @@ def check_host(host, text, findings, raw):
         "缺少或 DOWN：" + ", ".join(missing) if missing else "bond0、br3704 UP")
 
     addr = parts.get("ADDR", "")
-    need = [f"172.16.23.{host}", f"10.16.23.{host}"]
+    need = [f"{HOST_NET_PREFIX}{host}", f"{HOST_INNER_PREFIX}{host}"]
     missing = [a for a in need if a not in addr]
     add(findings, sec, f"host{host} 地址",
         "FAIL" if missing else "OK",
         "缺少：" + ", ".join(missing) if missing else "管理地址和内部地址存在")
 
     route = parts.get("ROUTE", "")
+    default_route = f"default via {GATEWAY}"
     add(findings, sec, f"host{host} 默认路由",
-        "OK" if "default via 172.16.23.1" in route else "FAIL",
-        "默认路由指向 172.16.23.1" if "default via 172.16.23.1" in route else "未看到默认路由 172.16.23.1")
+        "OK" if default_route in route else "FAIL",
+        f"默认路由指向 {GATEWAY}" if default_route in route else f"未看到默认路由 {GATEWAY}")
 
     bond = parts.get("BOND", "")
     speeds = [int(x) for x in re.findall(r"Speed:\s*(\d+)\s*Mbps", bond)]
@@ -707,10 +726,10 @@ def check_switch(cfg, findings, raw):
         "缺少：" + ", ".join(missing) if missing else "3701、3702、3703、3704、3705、3710、3711、3713、3714 存在")
 
     route = parts.get("display ip routing-table", "")
-    route_ok = "0.0.0.0/0" in route and "172.16.23.254" in route
+    route_ok = "0.0.0.0/0" in route and ROUTER_LAN_IP in route
     add(findings, "核心交换机", "默认路由",
         "OK" if route_ok else "FAIL",
-        "0.0.0.0/0 → 172.16.23.254" if route_ok else "未看到默认路由 172.16.23.254")
+        f"0.0.0.0/0 → {ROUTER_LAN_IP}" if route_ok else f"未看到默认路由 {ROUTER_LAN_IP}")
 
     ntp = parts.get("display ntp-service status", "")
     add(findings, "核心交换机", "NTP",
@@ -718,7 +737,7 @@ def check_switch(cfg, findings, raw):
         "已同步" if "Clock status: synchronized" in ntp else "未同步或未解析")
 
     dhcp = parts.get("display dhcp server pool", "")
-    dhcp_ok = "Pool name: vlan3714" in dhcp and "gateway-list 172.16.34.1" in dhcp
+    dhcp_ok = "Pool name: vlan3714" in dhcp and f"gateway-list {DHCP_GATEWAY}" in dhcp
     add(findings, "核心交换机", "DHCP 地址池",
         "OK" if dhcp_ok else "WARN",
         "vlan3714 地址池存在" if dhcp_ok else "未解析到 vlan3714 地址池")
@@ -757,20 +776,20 @@ def check_router(cfg, findings, raw):
         "Netcore N60 Pro" if "N60" in board else "未识别到 N60")
 
     addr = parts.get("ADDR", "")
-    missing = [a for a in ("172.16.23.254", "172.16.34.254") if a not in addr]
+    missing = [a for a in (ROUTER_LAN_IP, ROUTER_IP) if a not in addr]
     add(findings, "出口路由器", "接口地址",
         "FAIL" if missing else "OK",
-        "缺少：" + ", ".join(missing) if missing else "172.16.23.254、172.16.34.254 存在")
+        "缺少：" + ", ".join(missing) if missing else f"{ROUTER_LAN_IP}、{ROUTER_IP} 存在")
 
     route = parts.get("ROUTE", "")
     route_ok = "default via" in route
     add(findings, "出口路由器", "默认路由",
         "OK" if route_ok else "FAIL",
         "存在默认路由" if route_ok else "未看到默认路由")
-    missing_routes = [net for net in ("172.16.24.0/24", "172.16.30.0/24", "172.16.31.0/24", "172.16.32.0/24", "172.16.33.0/24") if net not in route]
+    missing_routes = [net for net in RETURN_ROUTES if net not in route]
     add(findings, "出口路由器", "回程路由",
         "WARN" if missing_routes else "OK",
-        "缺少：" + ", ".join(missing_routes) if missing_routes else "24/30/31/32/33 回程路由存在")
+        "缺少：" + ", ".join(missing_routes) if missing_routes else "回程网段齐全")
 
     route6 = parts.get("ROUTE6", "")
     add(findings, "出口路由器", "IPv6 默认路由",
@@ -793,11 +812,11 @@ def check_reachability(findings):
         "OK" if reachable == len(BMC_IPS) else "WARN",
         f"{reachable}/{len(BMC_IPS)} 个 BMC HTTPS 端口可达")
     try:
-        sock = socket.create_connection(("172.16.23.41", 80), timeout=3)
+        sock = socket.create_connection((CTRL_IP, 80), timeout=3)
         sock.close()
-        add(findings, "安全基线", "Horizon 80", "OK", "172.16.23.41:80 可达")
+        add(findings, "安全基线", "Horizon 80", "OK", f"{CTRL_IP}:80 可达")
     except OSError:
-        add(findings, "安全基线", "Horizon 80", "WARN", "172.16.23.41:80 不可达")
+        add(findings, "安全基线", "Horizon 80", "WARN", f"{CTRL_IP}:80 不可达")
 
 
 # --------------------------------------------------------------------- report
@@ -868,7 +887,7 @@ def main():
         "operator": args.operator,
         "host_user": env("LAB_HOST_USER", "root"),
         "host_password": "" if args.skip_hosts else secret("LAB_HOST_PASSWORD", "宿主机 root 口令: "),
-        "ctrl_user": env("LAB_CTRL_USER", "ops"),
+        "ctrl_user": env("LAB_CTRL_USER", "admin"),
         "ctrl_password": "" if (args.skip_control and args.skip_openstack) else secret("LAB_CTRL_PASSWORD", "控制节点 Linux 口令: "),
         "switch_user": env("LAB_SWITCH_USER", "admin"),
         "switch_password": "" if args.skip_switch else secret("LAB_SWITCH_PASSWORD", "交换机口令: "),
@@ -879,7 +898,7 @@ def main():
         "os_user": env("LAB_OS_USER", "admin"),
         "os_password": "" if args.skip_openstack else secret("LAB_OS_PASSWORD", "OpenStack admin 口令: "),
         "os_project": env("LAB_OS_PROJECT", "admin"),
-        "os_auth_url": env("LAB_OS_AUTH_URL", "http://10.16.23.41:5000/v3"),
+        "os_auth_url": env("LAB_OS_AUTH_URL", f"http://{CTRL_IP}:5000/v3"),
     }
 
     started = now_text()
@@ -920,7 +939,7 @@ if __name__ == "__main__":
 - 首次连接某台设备时，Paramiko 会提示未知主机密钥。确认地址正确后再接受。若要长期使用，建议把主机密钥加入 `known_hosts`。
 - 脚本不会把口令写进报告。但原始输出包含内部 IP、主机名、卷 ID 和实例名，报告应按内部资料保管。
 - 脚本不尝试逐个登录验证所有账号口令，避免多次失败锁定账号。
-- 脚本统计安全组数量，但不逐条审计规则；需要做安全专项时，按[风险评估与问题上报](report.md)的流程单独检查。
+- 脚本统计安全组数量，但不逐条审计规则；需要做安全专项时，按[防护基线](../safety/hardening.md)和[入侵排查与命令](../safety/inspect.md)单独检查。
 - 如果 OpenStack 命令在 JSON 前后夹杂弃用警告，脚本会截取 JSON 数组；截取失败时保留原始输出并标 WARN。
 - 如果某项采集失败，报告仍会生成，失败项标为 FAIL，不会因为单台设备不可达而丢掉整份报告。
 - 报告中的 Cinder 服务 down 可能包含备份服务、旧 NFS 后端等非核心服务，先看具体 `Binary (Host)` 再判断。
@@ -929,6 +948,7 @@ if __name__ == "__main__":
 ## 相关文档
 
 - [运行与日常维护](maintenance.md)：巡检周期、备份、更新和变更流程。
+- [安全](../safety/index.md)：挖矿入侵手法、防护基线、排查和应急处置。
 - [数据存储](storage.md)：Cinder、LVM、iSCSI 和备份的解释。
 - [网络架构](network.md)：VLAN、路由、DHCP/DNS 和 VXLAN。
 - [核心交换机](switch.md)：端口、LACP、ACL 和面板标注。
@@ -937,3 +957,4 @@ if __name__ == "__main__":
 ---
 
 返回[管理员视角总目录](index.md) ｜ 返回[手册首页](../index.md)
+
