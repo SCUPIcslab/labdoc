@@ -69,7 +69,7 @@ sudo stat -c '%a %U:%G %n' /home/<user>/.ssh /home/<user>/.ssh/authorized_keys
 - 定期把指纹和负责人对一遍；只看注释不可靠，注释可以随便写。
 - 不要往 `authorized_keys` 里加 `command=`、`from=` 之类看不懂的限制，除非确实理解作用。
 
-## 四、账号与权限
+## 账号与权限
 
 ### 账号盘点
 
@@ -128,7 +128,7 @@ sudo -l -U <user>
 - 是否被多个用户共用；
 - 是否还在被应用程序使用，能否改成密钥或受限 sudo。
 
-## 五、持久化面
+## 持久化面
 
 每次安全检查和事件排查都过一遍下面这些位置：
 
@@ -171,7 +171,7 @@ cat /etc/rc.local 2>/dev/null
 - `ld.so.preload` 非空时，查每个 `.so` 的来源和哈希。
 - 用户单位置也要看，不要只查系统 unit。
 
-## 六、日志与告警
+## 日志与告警
 
 ### 先保证日志不丢
 
@@ -218,7 +218,7 @@ sudo journalctl -u ssh --since '7 days ago' --no-pager | tail -100
 sudo last -a | head -30
 ```
 
-## 七、出网与资源
+## 出网与资源
 
 挖矿必须连矿池，C2 必须回连。出网监控往往比主机杀毒更早发现问题。
 
@@ -242,7 +242,7 @@ nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv
 
 不要只按 IP 封禁。攻击者会换 IP、换域名，行为特征和持久化位置更稳定。
 
-## 八、补丁与供应链
+## 补丁与供应链
 
 - 及时安装安全更新，尤其是 OpenSSH、内核、glibc、Docker、Web 框架。
 - 不在生产环境直接 `apt upgrade`；先评估、备份、安排窗口。
@@ -252,7 +252,7 @@ nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv
 - 不在服务器上安装未经审查的 AI 代理、自动化脚本、远程控制工具。
 - 对模型权重、数据集、第三方二进制做来源和哈希记录。
 
-## 九、备份与恢复
+## 备份与恢复
 
 - 重要配置、数据库、用户数据定期备份。
 - 至少一份离线或不可变备份，避免被勒索软件/入侵者一起删掉。
@@ -260,7 +260,7 @@ nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv
 - 事件处置前先备份现场，但不要把恶意样本留在生产主机上。
 - 如果怀疑 root 级入侵，优先从可信镜像重装，再从备份恢复数据；不要试图在已被 root 控制的系统上“清理干净”。
 
-## 十、月度安全检查表
+## 月度安全检查表
 
 这一节集中列出每月要做的安全检查；日常维护页只保留入口，不再重复具体条目。每月至少做一次，把结果记在维护记录里。
 
@@ -285,7 +285,7 @@ nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv
 | 17 | 备份 | 最近备份时间、恢复演练记录 | 有离线副本，能恢复。 |
 | 18 | 离职账号 | 对照人员名单 | 已删账号、家目录、公钥、cron、sudo。 |
 
-## 十一、落地顺序
+## 落地顺序
 
 如果现在只能做五件事，按这个顺序：
 
@@ -297,7 +297,7 @@ nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv
 
 每改一项，先验证再改下一项。涉及 SSH 和防火墙时，保留一个已登录会话和一个带外入口。
 
-## 十二、不要做的事
+## 不要做的事
 
 - 不要把 22 端口直接映射到公网，也不要用“临时”隧道长期暴露。
 - 不要给服务账号设置可登录密码，不要把它留在 sudo 组。

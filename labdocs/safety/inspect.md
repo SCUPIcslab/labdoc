@@ -12,7 +12,7 @@
 - 先记录时间、主机名、执行账号和命令输出，再考虑清理。
 :::
 
-## 一、先判断是不是安全事件
+## 先判断是不是安全事件
 
 | 现象 | 更像资源/配置问题 | 更像安全事件 |
 |---|---|---|
@@ -26,7 +26,7 @@
 
 拿不准时，按安全事件处理：先只读采集，再判断。采集本身不会破坏系统。
 
-## 二、五分钟快查
+## 五分钟快查
 
 ```bash
 # 身份、时间、负载
@@ -65,7 +65,7 @@ sudo last -a | head -30
 
 这一步的目标不是“确认有没有病毒”，而是找出明显的异常方向。任何一项命中，继续看对应章节。
 
-## 三、进程与可执行文件
+## 进程与可执行文件
 
 ### 看进程树和资源
 
@@ -124,7 +124,7 @@ sudo cat /proc/<PID>/environ | tr '\0' '\n'
 
 `environ` 里可能出现 `LD_PRELOAD`、代理、矿池地址、钱包等线索。不要把它直接贴到公开渠道，可能含凭据。
 
-## 四、网络与外联
+## 网络与外联
 
 ### 连接和监听
 
@@ -165,7 +165,7 @@ sudo tcpdump -ni any -c 100 'port 53 or port 3333 or port 9000'
 
 抓包文件可能包含敏感信息，按内部资料保管。
 
-## 五、持久化
+## 持久化
 
 ### 用户 crontab
 
@@ -209,7 +209,7 @@ sudo find /etc/profile.d /etc/bash.bashrc /root /home -maxdepth 3 \
 
 `/etc/ld.so.preload` 非空时，逐个查 `.so` 的来源、哈希和所属软件包。
 
-## 六、账号与公钥
+## 账号与公钥
 
 ### 账号
 
@@ -260,7 +260,7 @@ sudo find / -xdev -perm -4000 -type f -ls 2>/dev/null
 
 SUID 列表可能很长，先与基线对比；没有基线时，重点看 `/tmp`、`/home`、`/opt` 下的 SUID。
 
-## 七、日志与登录
+## 日志与登录
 
 ```bash
 sudo grep -aE 'Failed password|Accepted|Invalid user|session opened' /var/log/auth.log | tail -100
@@ -280,7 +280,7 @@ systemctl show systemd-journald -p NRestarts
 
 日志时间要结合消息内时间看。
 
-## 八、文件系统与完整性
+## 文件系统与完整性
 
 ### 临时目录
 
@@ -325,7 +325,7 @@ sudo chkrootkit 2>/dev/null
 
 rootkit 扫描器有误报，也不能保证发现所有 rootkit。它们适合做辅助，不适合作为“干净”的唯一证据。
 
-## 九、GPU 挖矿排查
+## GPU 挖矿排查
 
 ```bash
 nvidia-smi
@@ -349,7 +349,7 @@ sudo ls -l /proc/<PID>/exe
 sudo lsof -p <PID> | head -30
 ```
 
-## 十、输出怎么判断
+## 输出怎么判断
 
 | 看到的现象 | 可能含义 | 下一步 |
 |---|---|---|
@@ -367,7 +367,7 @@ sudo lsof -p <PID> | head -30
 | `last` 里 `gone - no logout` | 非交互式登录或会话被杀 | 对照 auth.log 和 wtmp。 |
 | 大量出站 22 | 横向爆破 | 查进程、目标网段、同密码账号。 |
 
-## 十一、按现象查
+## 按现象查
 
 | 现象 | 先执行 | 重点看 |
 |---|---|---|
@@ -382,7 +382,7 @@ sudo lsof -p <PID> | head -30
 | 日志缺失 | `systemctl show systemd-journald -p NRestarts`、`journalctl` | 重启次数、速率限制、磁盘。 |
 | 同网段机器异常 | `ss -tnp`、`journalctl -u ssh` | 出站 22、同密码登录。 |
 
-## 十二、取证采集顺序
+## 取证采集顺序
 
 确认要处置前，先按下面的顺序采集。能留内存镜像更好，但不要为了取证把业务长时间停掉。
 
@@ -396,7 +396,7 @@ sudo lsof -p <PID> | head -30
 
 采集时把输出写到外部介质或另一台可信主机。不要只留在被入侵的机器上，攻击者可能删除。
 
-## 十三、一键只读采集
+## 一键只读采集
 
 下面脚本只读，不修改配置、不杀进程、不删文件。建议从 U 盘或可信主机复制过去执行，不要在被入侵主机上下载脚本再运行。
 
@@ -454,7 +454,7 @@ echo "written: $out"
 
 脚本输出可能包含账号、IP、文件名等内部信息。
 
-## 十四、注意事项
+## 注意事项
 
 - **不要只信 `ps`。** 进程名可以伪造，`/proc/<pid>/exe`、`cmdline`、`cwd` 更可靠。
 - **不要直接 `pkill -9 -u <user>`。** 可能杀掉正常任务，也会丢失证据；先记录 PID 和命令行。
