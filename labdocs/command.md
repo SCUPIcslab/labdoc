@@ -572,7 +572,7 @@ sha256sum <file>
 sha256sum -c checksums.txt
 ```
 
-把校验值一起保存，传输后对比。大文件传输中断时，先重新 `rsync`，不要反复从头 `scp`。
+把校验值一起保存，传输后对比。大文件传输中断时，先重新 `rsync`，不要反复从头 `scp`。完整的命令、续传、限速和 Windows 工具见[文件传输](user/transfer.md)。
 
 ## OpenStack CLI
 

@@ -22,6 +22,7 @@
 3. [运行与日常维护](maintenance.md)
 4. [一键巡检与时间节点检查](check.md)
 5. [风险评估与问题上报](report.md)
+6. [文档维护](vitepress.md)
 
 相关章节：[网络安全](../safety/index.md)：挖矿入侵手法、防护基线、排查与应急处置。
 
