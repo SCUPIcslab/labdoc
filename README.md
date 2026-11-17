@@ -1,19 +1,15 @@
-# SCUPI CSLAB 手册（公开版）
+# SCUPI CSLAB 手册
 
-SCUPI CSLAB（N209ABC）实验室手册的 VitePress 静态站点。公开版只包含可以放在互联网上的文档，不含管理员凭据页、访问口令、`server.mts` 或任何站点侧鉴权逻辑。
+SCUPI CSLAB（N209ABC）实验室手册的 VitePress 静态站点。站点内容只包含可以放在互联网上的文档，管理员凭据和访问口令不写入站点。
 
-- 公开站点：<https://scupicslab.github.io/labdoc/>
-- 公开仓库：<https://github.com/SCUPIcslab/labdoc>
+- 站点：<https://scupicslab.github.io/labdoc/>
+- 仓库：<https://github.com/SCUPIcslab/labdoc>
 
 ## 仓库定位
 
-本仓库只维护公开版。完整内网版由实验室内网单独维护，仓库地址和部署方式不对外公开。
+本仓库维护手册的唯一版本：站点内容在 `labdocs/`，配置在 `.vitepress/`，推送到 `main` 后由 GitHub Actions 自动构建并发布。
 
-公开版与内网版独立维护，不再使用分支区分：
-
-- 内网内容不要合并或复制到本仓库。
-- 本仓库的删除操作不要反向合并回内网版本。
-- 凭据、口令、密钥和内部账号只保留在受控渠道中。
+凭据、口令、密钥和内部账号不写入文档，只通过受控渠道交接。
 
 ## 目录结构
 
@@ -30,14 +26,9 @@ SCUPI CSLAB（N209ABC）实验室手册的 VitePress 静态站点。公开版只
 │   ├── user/                           # 用户视角
 │   ├── safety/                         # 安全：挖矿手法、防护、排查、处置
 │   └── public/                         # 原样复制到站点根目录的静态文件
-├── print/                              # 离线打印材料，不参与站点构建
 ├── package.json
 └── package-lock.json
 ```
-
-`labdocs/` 下没有 `password/`。公开搜索索引也不包含任何凭据页内容。
-
-`print/` 不在 VitePress 的 `srcDir` 内，不会出现在站点中，页面也不链接到它。打印稿单独编译成 PDF。
 
 ## 本地开发
 
@@ -92,10 +83,9 @@ GITHUB_ACTIONS=true GITHUB_REPOSITORY=SCUPIcslab/labdoc npm run docs:build
 
 workflow 会执行：
 
-1. 检查仓库中没有 `labdocs/password/`、`server.mts`、`.vitepress/auth.mts`、`.vitepress/auth.secret`。
-2. `npm ci`
-3. `npm run docs:build`
-4. 上传 `.vitepress/dist/` 并部署到 GitHub Pages。
+1. `npm ci`
+2. `npm run docs:build`
+3. 上传 `.vitepress/dist/` 并部署到 GitHub Pages。
 
 部署完成后，站点地址为：
 
@@ -117,7 +107,6 @@ git push
 
 ## 维护注意
 
-- 本仓库是公开仓库，提交前确认没有真实口令、API Token、私钥、个人信息或内部账号。
-- 管理员文档中的内部地址、设备型号和拓扑图属于公开版的一部分；如果以后需要收紧，先把对应段落移到内网版本，再从本仓库删除。
-- 不要在公开版中恢复 `/password/`、`server.mts` 或鉴权中间件。
+- 仓库会发布到互联网，提交前确认没有真实口令、API Token、私钥、个人信息或内部账号。
+- 管理员文档中的内部地址、设备型号和拓扑图直接写在本仓库中；需要收紧时，删除对应段落再发布。
 - 如果 GitHub Pages 对无扩展名 URL 返回 404，检查 **Settings → Pages** 的部署状态；VitePress 的 `cleanUrls` 在 GitHub Pages 上由 `.html` 回退处理，通常不需要额外配置。

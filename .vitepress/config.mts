@@ -38,6 +38,10 @@ export default defineConfig({
       { text: '用户视角', link: '/user/' }
     ],
 
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/SCUPIcslab/labdoc' }
+    ],
+
     sidebar: [
       {
         text: '总览',
@@ -83,7 +87,8 @@ export default defineConfig({
           },
           { text: '运行与日常维护', link: '/admin/maintenance' },
           { text: '一键巡检与时间节点检查', link: '/admin/check' },
-          { text: '风险评估与问题上报', link: '/admin/report' }
+          { text: '风险评估与问题上报', link: '/admin/report' },
+          { text: '文档维护', link: '/admin/vitepress' }
         ]
       },
       {
@@ -94,6 +99,8 @@ export default defineConfig({
           { text: '账号与权限', link: '/user/account' },
           { text: 'GPU 使用', link: '/user/gpu' },
           { text: '数据与存储', link: '/user/storage' },
+          { text: '文件传输', link: '/user/transfer' },
+          { text: '网络与代理', link: '/user/proxy' },
           { text: '常见疑难解答', link: '/user/faq' },
           { text: '使用规范', link: '/user/rules' },
           { text: '问题上报', link: '/user/report' }
