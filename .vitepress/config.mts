@@ -82,7 +82,8 @@ export default defineConfig({
             items: [
               { text: '实验室路由器', link: '/admin/router' },
               { text: '交换机', link: '/admin/switch' },
-              { text: '数据存储', link: '/admin/storage' }
+              { text: '数据存储', link: '/admin/storage' },
+              { text: '磁盘的挂载', link: '/admin/mount' }
             ]
           },
           { text: '运行与日常维护', link: '/admin/maintenance' },
@@ -101,6 +102,7 @@ export default defineConfig({
           { text: '数据与存储', link: '/user/storage' },
           { text: '文件传输', link: '/user/transfer' },
           { text: '网络与代理', link: '/user/proxy' },
+          { text: '服务器瓶颈', link: '/user/bottleneck' },
           { text: '常见疑难解答', link: '/user/faq' },
           { text: '使用规范', link: '/user/rules' },
           { text: '问题上报', link: '/user/report' }
