@@ -737,10 +737,11 @@ def check_switch(cfg, findings, raw):
         "已同步" if "Clock status: synchronized" in ntp else "未同步或未解析")
 
     dhcp = parts.get("display dhcp server pool", "")
-    dhcp_ok = "Pool name: vlan3714" in dhcp and f"gateway-list {DHCP_GATEWAY}" in dhcp
+    # IPv4 DHCP 由出口路由器发放，H3C 上不应再有 vlan3714 池（双服务器会冲突）。
+    dhcp_migrated = "Pool name: vlan3714" not in dhcp
     add(findings, "核心交换机", "DHCP 地址池",
-        "OK" if dhcp_ok else "WARN",
-        "vlan3714 地址池存在" if dhcp_ok else "未解析到 vlan3714 地址池")
+        "OK" if dhcp_migrated else "WARN",
+        "H3C 无用户地址池（DHCP 已迁至路由器，符合预期）" if dhcp_migrated else "仍解析到 vlan3714 地址池，可能与路由器 DHCP 冲突")
 
     acl = parts.get("display acl all", "")
     add(findings, "核心交换机", "ACL 3000",

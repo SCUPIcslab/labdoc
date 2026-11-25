@@ -100,8 +100,8 @@ GPU 规格中的 `pci_passthrough:alias` 是 Nova 的 PCI 直通别名。它告�
 
 OpenStack 网络建立在物理网络的 VLAN 之上。主要对象包括：
 
-- `net3711`：VLAN 网络，子网 172.16.31.0/24，供 T3711 项目使用。
 - `net3713`：VLAN 网络，子网 172.16.33.0/24，GPU 实例和 T3713 项目使用。
+- 已删除：`net3711`（172.16.31.0/24）、`net3712`（172.16.32.0/24）废弃删除，二者无虚拟机，仅剩 neutron 自动 DHCP 端口。
 - `public-exnet`：flat 外部网络，子网 172.16.23.0/24，提供浮动 IP 和 SNAT。
 - `lb-mgmt-net`：VXLAN 网络，10.1.0.0/24，Octavia 使用。
 - `HA network tenant ...`：VXLAN 网络，169.254.192.0/18，Neutron 路由器高可用使用。
